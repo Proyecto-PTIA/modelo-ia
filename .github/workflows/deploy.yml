@@ -13,30 +13,36 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          lfs: true
+          lfs: true # Crucial para traer los archivos pesados desde GitHub
 
       - name: Push to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # 1. Configurar identidad (evita errores de commit)
+          # 1. Configurar identidad
           git config --global user.email "paco.andres03@gmail.com"
           git config --global user.name "Oscar Andrés Sánchez"
           
-          # 2. Preparar LFS y clonar el Space
+          # 2. Inicializar LFS
           git lfs install
+          
+          # 3. Clonar el Space
           git clone https://huggingface.co/spaces/escorpionfake/modelo-ia-recetas space
           
-          # 3. Sincronizar archivos (excluyendo .git del repo original)
+          # 4. Sincronizar archivos
           rsync -av --exclude=".git" ./ space/
           
-          # 4. Commit y Push al Space
+          # 5. Forzar a que el Space reconozca el archivo como LFS
           cd space
-          git add .
-          # Solo hacer commit si hay cambios reales
+          git lfs track "*.keras"
+          git lfs track "*.h5"
+          git add .gitattributes
+          git add models/model_mobilenetv2.keras
+          
+          # 6. Commit y Push
           if [ -n "$(git status --porcelain)" ]; then
-            git commit -m "Auto deploy: Actualización de S.I.R.I. desde GitHub"
-            git push https://escorpionfake:$HF_TOKEN@huggingface.co/spaces/escorpionfake/modelo-ia-recetas main
+            git commit -m "Auto deploy: Incluyendo modelo S.I.R.I. vía LFS"
+            git push https://escorpionfake:${{ secrets.HF_TOKEN }}@huggingface.co/spaces/escorpionfake/modelo-ia-recetas main --force
           else
-            echo "No hay cambios para desplegar."
+            echo "Sin cambios"
           fi
