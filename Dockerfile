@@ -5,11 +5,13 @@ FROM python:3.10-slim
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Instalar dependencias del sistema para OpenCV/TensorFlow si son necesarias
+# --- ESTA ES LA PARTE QUE CAMBIA ---
+# Instalamos libgl1 y libglib2.0-0 que son las versiones actuales
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
+    libgl1 \
     libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
+# -----------------------------------
 
 # Crear directorio de trabajo
 WORKDIR /app
@@ -24,8 +26,8 @@ COPY . .
 # Crear carpeta de uploads con permisos
 RUN mkdir -p static/uploads && chmod 777 static/uploads
 
-# Exponer el puerto que usa Hugging Face (7860)
+# Exponer el puerto de Hugging Face
 EXPOSE 7860
 
-# Ejecutar la app con Gunicorn (más estable que el debug de Flask)
+# Ejecutar con Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:7860", "app:app"]
