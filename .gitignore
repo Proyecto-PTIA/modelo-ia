@@ -41,3 +41,5 @@ mobilenet_v2_weights_tf_dim_ordering_tf_kernels_1.0_224_no_top.h5
 
 # 🔹 Uploads (no subir imágenes de usuarios)
 static/uploads/
+# 🔹 Carpeta temporal del pipeline
+space/
