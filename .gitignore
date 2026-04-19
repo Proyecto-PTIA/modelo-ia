@@ -1,0 +1,43 @@
+# 🔹 Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 🔹 Entornos virtuales
+venv/
+tf_env/
+.env/
+
+# 🔹 Variables de entorno
+.env
+
+# 🔹 Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# 🔹 Logs
+*.log
+
+# 🔹 Archivos temporales
+*.tmp
+
+# 🔹 VS Code
+.vscode/
+
+# 🔹 GitHub Actions (si no lo usas aquí)
+# .github/
+
+# 🔹 Datos pesados (solo si crecen mucho)
+# data/*.csv
+# data/*.gz
+
+# 🔹 Modelos grandes (❌ SOLO si algún día pesan mucho)
+# models/*.h5
+# models/*.keras
+
+# 🔹 Pesos descargados automáticamente (IMPORTANTE)
+mobilenet_v2_weights_tf_dim_ordering_tf_kernels_1.0_224_no_top.h5
+
+# 🔹 Uploads (no subir imágenes de usuarios)
+static/uploads/
