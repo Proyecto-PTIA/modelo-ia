@@ -1,4 +1,4 @@
-name: Deploy to Hugging Face Spaces
+name: Deploy to Hugging Face
 
 on:
   push:
@@ -8,34 +8,35 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # 1. Clonar tu repo de GitHub
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
 
-      # 2. Configurar Git
-      - name: Setup Git
-        run: |
-          git config --global user.email "github-actions@users.noreply.github.com"
-          git config --global user.name "github-actions"
-
-      # 3. Clonar tu Space de Hugging Face
-      - name: Clone Hugging Face Space
+      - name: Push to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git clone https://escorpionfake:${HF_TOKEN}@huggingface.co/spaces/escorpionfake/modelo-ia-recetas space
-
-      # 4. Sincronizar archivos
-      - name: Sync files
-        run: |
+          # 1. Configurar identidad (evita errores de commit)
+          git config --global user.email "paco.andres03@gmail.com"
+          git config --global user.name "Oscar Andrés Sánchez"
+          
+          # 2. Preparar LFS y clonar el Space
+          git lfs install
+          git clone https://huggingface.co/spaces/escorpionfake/modelo-ia-recetas space
+          
+          # 3. Sincronizar archivos (excluyendo .git del repo original)
           rsync -av --exclude=".git" ./ space/
-
-      # 5. Commit y push al Space
-      - name: Push to Hugging Face
-        run: |
+          
+          # 4. Commit y Push al Space
           cd space
           git add .
-          git commit -m "🚀 Auto deploy from GitHub" || echo "No changes"
-          git push
+          # Solo hacer commit si hay cambios reales
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Auto deploy: Actualización de S.I.R.I. desde GitHub"
+            git push https://escorpionfake:$HF_TOKEN@huggingface.co/spaces/escorpionfake/modelo-ia-recetas main
+          else
+            echo "No hay cambios para desplegar."
+          fi
