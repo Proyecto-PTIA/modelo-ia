@@ -5,7 +5,6 @@ import uuid
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 
-from recomendador import recomendar_por_texto
 from models.modelo_clip import predecir_plato
 
 # 🔹 Config inicial
@@ -26,9 +25,9 @@ def load_json(path):
 def home():
     return {"mensaje": "API de IA funcionando 🚀"}
 
-# 🔹 Endpoint principal
-@app.route("/predict", methods=["POST"])
-def predict():
+# 🔹 Endpoint IA (LIMPIO)
+@app.route("/detect-dish", methods=["POST"])
+def detect_dish():
     try:
         # 🔸 Validar imagen
         if "foto" not in request.files:
@@ -50,50 +49,19 @@ def predict():
         # 🔥 Predicción IA
         plato = predecir_plato(ruta).lower().strip()
 
-        # 🔥 Eliminar imagen (liberar espacio)
+        # 🔥 Eliminar imagen (importante)
         if os.path.exists(ruta):
             os.remove(ruta)
 
-        # 🔸 Cargar datos
+        # 🔸 Cargar SOLO lo necesario
         mapa = load_json(os.path.join(BASE_DIR, "data", "map_plato_ingredientes.json"))
-        calorias_data = load_json(os.path.join(BASE_DIR, "data", "calorias_platos.json"))
-        categorias_data = load_json(os.path.join(BASE_DIR, "data", "categorias_platos.json"))
-        recetas_data = load_json(os.path.join(BASE_DIR, "data", "recetas_platos.json"))
-        tiempos_data = load_json(os.path.join(BASE_DIR, "data", "tiempos_preparacion.json"))
 
-        # 🔸 Obtener información
         ingredientes = mapa.get(plato, [])
-        texto = " ".join(ingredientes)
 
-        recomendaciones = recomendar_por_texto(texto)
-
-        total_calorias = calorias_data.get(plato, "No disponible")
-
-        # 🔸 Clasificación nutricional
-        if isinstance(total_calorias, int):
-            if total_calorias < 200:
-                nivel = "bajo"
-            elif total_calorias < 400:
-                nivel = "medio"
-            else:
-                nivel = "alto"
-        else:
-            nivel = "no_disponible"
-
-        categorias = categorias_data.get(plato, [])
-        pasos = recetas_data.get(plato, {}).get("pasos", [])
-        tiempo = tiempos_data.get(plato, "No disponible")
-
-        # 🔥 Respuesta final
+        # 🔥 Respuesta MINIMAL
         return jsonify({
             "plato": plato,
-            "ingredientes": ingredientes,
-            "calorias": total_calorias,
-            "nivel": nivel,
-            "categorias": categorias,
-            "pasos": pasos,
-            "tiempo_preparacion": tiempo,
-            "recomendaciones": recomendaciones
+            "ingredientes": ingredientes
         })
 
     except Exception as e:
